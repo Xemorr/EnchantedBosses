@@ -1,0 +1,102 @@
+Broodmother:
+  colouredName: "<light_purple><b>Broodmother"
+  description: The queen of spiders
+  damagemodifier: # tweaks the damage broodmother receives
+    type: EASEDPLAYERADJUSTED
+    damageCap: 15
+    expectedMaximumDamage: 30
+    # this means that 4 players fighting the broodmother is roughly equivalent to 2 fighting a not player adjusted broodmother
+    # this makes it easier to balance bosses for solo players and players in teams
+    playerScalingModifier: 0.5
+  entity:
+    type: SPIDER
+    shouldDespawn: false
+    attributes:
+      MAX_HEALTH: 120
+      MOVEMENT_SPEED: 0.6
+      ATTACK_DAMAGE: 10
+  skills:
+    spawn_minions:
+      trigger:
+        type: COMBAT # umbrella trigger that occurs when it is damaged, or it damages something else
+        conditions:
+          proc:
+            type: CHANCE
+            mode: SELF
+            chance: 0.2
+          cooldown:
+            type: COOLDOWN
+            mode: SELF
+            cooldown: 12
+      effects:
+        spawn_minion1:
+          type: MINION
+          mode: SELF
+          spawn: BroodmotherMinion
+        spawn_minion2:
+          type: MINION
+          mode: SELF
+          spawn: BroodmotherMinion
+        spawn_minion3:
+          type: MINION
+          mode: SELF
+          spawn: BroodmotherMinion
+    poison:
+      trigger:
+        type: DAMAGEDENTITY # trigger that occurs when damaging a different entity
+        conditions:
+          proc:
+            type: CHANCE
+            mode: SELF
+            chance: 0.2
+          cooldown:
+            type: COOLDOWN
+            mode: SELF
+            cooldown: 10
+      effects:
+        poison:
+          type: POTION
+          mode: OTHER
+          potion:
+            type: POISON
+            potency: 2
+            duration: 10
+        cobwebcube:
+          type: LOCATIONCUBE
+          mode: OTHER
+          verticalRadius: 1
+          horizontalRadius: 1
+          offset:
+            y: 1
+          effects:
+            cobweb:
+              type: PLACEBLOCK
+              mode: LOCATION
+              block:
+                type: COBWEB
+  rewards:
+    type: BASIC
+    items:
+      netherite:
+        type: NETHERITE_INGOT
+        amount: 1
+      steak:
+        type: COOKED_BEEF
+        amount: 16
+    experience: 50
+    commands: [ ]
+  autospawn:
+    mode: BOSS
+    weighting: 1
+    biomes:
+      - FOREST
+      - SWAMP
+    worlds:
+      - world
+    biomesWhitelist: true
+    spaceNeeded: 4
+  bossbar:
+    enabled: true
+    flags: [ ]
+    color: PURPLE
+    style: PROGRESS

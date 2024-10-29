@@ -1,0 +1,66 @@
+Flesheater:
+  colouredName: "<yellow><b>Flesheater"
+  description: "A creature with an insatiable thirst for flesh"
+  damagemodifier:
+    type: EASED
+    damageCap: 15
+    expectedMaximumDamage: 30
+  entity:
+    type: ZOMBIE
+    equipment:
+      helmet:
+        type: DIAMOND_HELMET
+      chestplate:
+        type: IRON_CHESTPLATE
+    attributes:
+      MAX_HEALTH: 50
+  skills:
+    fling:
+      trigger:
+        type: COMBAT
+        conditions:
+          proc:
+            type: CHANCE
+            mode: SELF
+            chance: 0.5
+          cooldown:
+            type: COOLDOWN
+            mode: SELF
+            cooldown: 10
+      effects:
+        fling:
+          type: FLING
+          mode: OTHER
+          velocity: 1.0
+    antiboat:
+      trigger:
+        type: VEHICLE
+      effects:
+        antiboat:
+          type: CANCEL
+          mode: SELF
+  rewards:
+    type: BASIC
+    items:
+      diamonds:
+        type: DIAMOND
+        amount: 10
+      steak:
+        type: COOKED_BEEF
+        amount: 16
+    experience: 50
+    commands: []
+  autospawn:
+    mode: BOSS
+    weighting: 1
+    biomes:
+      - PLAINS
+    worlds:
+      - world
+    biomesWhitelist: true
+    spaceNeeded: 4
+  bossbar:
+    enabled: true
+    flags: [ ]
+    color: GREEN
+    style: PROGRESS

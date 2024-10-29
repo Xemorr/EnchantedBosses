@@ -1,0 +1,24 @@
+autospawn:
+  times:
+    -  "19:00:00"
+language:
+  no_permission: "<dark_red>You do not have permission to do this!"
+  invalid_boss: "<dark_red>You have entered an invalid boss name!"
+  invalid_player: "<dark_red>You have entered an invalid player name!"
+  invalid_location: "<dark_red>You have entered an invalid location"
+  boss_spawned: A <name> has spawned at <x>, <y>, <z> in world <world>!
+  boss_time: "A boss will spawn in <hour> hours, <minutes> minutes and <seconds> seconds!"
+  no_boss_time: Bosses are not currently spawning on a timer!
+  boss_spawn_fail: "*CRACK* The boss egg failed for some reason!"
+  boss_death_broadcast: "A <boss> has been killed by <player>"
+spawneggs:
+  egg1:
+    item:
+      type: SHULKER_SPAWN_EGG
+      amount: 1
+      metadata:
+        displayName: "<red><b>HARD</b> Boss Egg"
+    bosses:
+      - Flesheater
+textconvert: true
+default_entity_weighting: 100

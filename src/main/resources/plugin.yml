@@ -1,0 +1,11 @@
+name: EnchantedBosses
+version: ${project.version}
+main: me.xemor.enchantedbosses.EnchantedBosses
+api-version: 1.16
+authors: [ Xemor_ ]
+depend: [ SkillsLibrary2 ]
+description: A configurable bosses plugin
+commands:
+  boss:
+    description: The root command of this plugin
+    usage: /boss <spawn/randomspawn/reload>
