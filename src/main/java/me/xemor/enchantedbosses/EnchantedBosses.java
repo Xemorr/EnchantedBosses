@@ -3,14 +3,14 @@ package me.xemor.enchantedbosses;
 import me.xemor.configurationdata.ConfigurationData;
 import me.xemor.enchantedbosses.bossbar.BossBarListeners;
 import me.xemor.enchantedbosses.commands.BossCommand;
+import me.xemor.enchantedbosses.configs.ConfigHandler;
 import me.xemor.enchantedbosses.damagemodifiers.DamageChanger;
 import me.xemor.enchantedbosses.events.Events;
 import me.xemor.enchantedbosses.skills.conditions.BossCondition;
 import me.xemor.enchantedbosses.skills.effects.Minion;
 import me.xemor.enchantedbosses.skills.effects.Rider;
-import me.xemor.enchantedbosses.spawning.EggHandler;
 import me.xemor.enchantedbosses.spawning.SpawnHandler;
-import me.xemor.skillslibrary2.SkillsLibrary;
+import me.xemor.foliahacks.FoliaHacks;
 import me.xemor.skillslibrary2.conditions.Conditions;
 import me.xemor.skillslibrary2.effects.Effects;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -18,16 +18,13 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.server.ServerLoadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import space.arim.morepaperlib.scheduling.GracefulScheduling;
 
-import java.io.ObjectInputFilter;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.logging.Level;
 
 public final class EnchantedBosses extends JavaPlugin implements Listener {
@@ -36,11 +33,12 @@ public final class EnchantedBosses extends JavaPlugin implements Listener {
     private BossHandler bossHandler;
     private SpawnHandler spawnHandler;
     private ConfigHandler configHandler;
-    private EggHandler eggHandler;
+    private static FoliaHacks foliaHacks;
     private static BukkitAudiences bukkitAudiences;
 
     @Override
     public void onEnable() {
+        EnchantedBosses.foliaHacks = new FoliaHacks(this);
         enchantedBosses = this;
         ConfigurationData.setup(this);
         bukkitAudiences = BukkitAudiences.create(this);
@@ -55,7 +53,6 @@ public final class EnchantedBosses extends JavaPlugin implements Listener {
         this.getServer().getPluginManager().registerEvents(this, this);
         this.getServer().getPluginManager().registerEvents(new Events(), this);
         this.getServer().getPluginManager().registerEvents(new DamageChanger(), this);
-        eggHandler = new EggHandler();
     }
 
     public static BukkitAudiences getBukkitAudiences() {
@@ -71,10 +68,9 @@ public final class EnchantedBosses extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onLoad(ServerLoadEvent e) {
-        configHandler.loadBosses(bossHandler);
+        configHandler.loadBosses();
         spawnHandler = new SpawnHandler(bossHandler);
         Bukkit.getServer().getPluginManager().registerEvents(spawnHandler, this);
-        configHandler.loadEggs();
         handleMetrics();
     }
 
@@ -122,8 +118,12 @@ public final class EnchantedBosses extends JavaPlugin implements Listener {
         return configHandler;
     }
 
-    public EggHandler getEggHandler() {
-        return eggHandler;
+    public static FoliaHacks getFoliaHacks() {
+        return foliaHacks;
+    }
+
+    public static GracefulScheduling getScheduling() {
+        return foliaHacks.getScheduling();
     }
 
     @Override

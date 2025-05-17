@@ -1,0 +1,8 @@
+egg1:
+  item:
+    type: SHULKER_SPAWN_EGG
+    amount: 1
+    metadata:
+      displayName: "<red><b>HARD</b> Boss Egg"
+  bosses:
+    - Flesheater

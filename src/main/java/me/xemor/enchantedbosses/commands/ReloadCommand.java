@@ -1,7 +1,7 @@
 package me.xemor.enchantedbosses.commands;
 
 import me.xemor.enchantedbosses.BossHandler;
-import me.xemor.enchantedbosses.ConfigHandler;
+import me.xemor.enchantedbosses.configs.ConfigHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 

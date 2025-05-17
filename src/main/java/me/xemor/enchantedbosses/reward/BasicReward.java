@@ -1,6 +1,7 @@
 package me.xemor.enchantedbosses.reward;
 
 import me.xemor.configurationdata.ItemStackData;
+import me.xemor.configurationdata.JsonPropertyWithDefault;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -14,36 +15,27 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
-public class BasicReward extends Reward {
+public class BasicReward implements Reward {
 
-    List<String> commands;
-    List<ItemStack> items = new ArrayList<>();
-    int experience;
-
-    public BasicReward(int reward, ConfigurationSection configurationSection) {
-        super(reward, configurationSection);
-        commands = configurationSection.getStringList("commands");
-        ConfigurationSection itemsSection = configurationSection.getConfigurationSection("items");
-        if (itemsSection != null) {
-            for (Object itemObject : itemsSection.getValues(false).values()) {
-                if (itemObject instanceof ConfigurationSection) {
-                    ConfigurationSection itemSection = (ConfigurationSection) itemObject;
-                    ItemStack item = new ItemStackData(itemSection).getItem();
-                    items.add(item);
-                }
-            }
-        }
-        experience = configurationSection.getInt("experience", 100);
-    }
+    @JsonPropertyWithDefault
+    private List<String> commands = Collections.emptyList();
+    @JsonPropertyWithDefault
+    private Map<String, ItemStack> items = Collections.emptyMap();
+    @JsonPropertyWithDefault
+    private int experience = 100;
 
     @Override
     public void giveRewards(LivingEntity boss, Player killer) {
         Location location = boss.getLocation();
         World world = location.getWorld();
-        for (ItemStack item : items) {
-            world.dropItem(location, item, (it) -> it.setVelocity(new Vector(Math.random() / 4, 0.5, Math.random() / 4)));
+        for (ItemStack item : items.values()) {
+            ThreadLocalRandom rng = ThreadLocalRandom.current();
+            world.dropItem(location, item, (it) -> it.setVelocity(new Vector(rng.nextDouble() / 4, 0.5, rng.nextDouble() / 4)));
         }
         if (killer != null) {
             for (String command : commands) {

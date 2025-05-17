@@ -1,29 +1,30 @@
-BroodmotherMinion:
-  colouredName: "<light_purple><b>Broodmother Spawn"
-  description: A youngling
-  entity:
-    type: CAVE_SPIDER
-    attributes:
-      MAX_HEALTH: 5
-      MOVEMENT_SPEED: 0.5
-      ATTACK_DAMAGE: 6
-  skills:
-    target:
-      trigger:
-        type: SPAWN
-      effects:
-        aoe:
-          type: AOE
-          radius: 16
-          conditions:
-            isplayer:
-              type: ENTITY
-              mode: OTHER
-              entities:
-                - PLAYER
-          effects: 
-            target:
-              type: TARGET
-              mode: OTHER
+name: BroodmotherMinion
+colouredname: "<light_purple><b>Broodmother Spawn"
+description: A youngling
+entity:
+  type: SPIDER
+  attributes:
+    MAX_HEALTH: 5
+    MOVEMENT_SPEED: 0.5
+    ATTACK_DAMAGE: 6
+    SCALE: 0.25
+skills:
+  target:
+    trigger:
+      type: SPAWN
+    effects:
+      aoe:
+        type: AOE
+        radius: 16
+        conditions:
+          isplayer:
+            type: ENTITY
+            mode: OTHER
+            entities:
+              - PLAYER
+        effects:
+          target:
+            type: TARGET
+            mode: OTHER
 
   

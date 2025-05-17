@@ -1,5 +1,7 @@
 package me.xemor.enchantedbosses.spawning;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import me.xemor.configurationdata.ItemStackData;
 import me.xemor.enchantedbosses.EnchantedBosses;
 import me.xemor.enchantedbosses.SkillEntity;
@@ -14,50 +16,34 @@ import java.util.stream.Collectors;
 
 public class SpawnEgg {
 
-    private final String name;
-    private final List<SkillEntity> skillEntities;
-    private final ItemStack itemStack;
-
-    public SpawnEgg(String name, ConfigurationSection configurationSection) {
-        this.name = name;
-        skillEntities = configurationSection.getStringList("bosses").stream().map((it) -> EnchantedBosses.getInstance().getBossHandler().getBoss(it)).collect(Collectors.toList());
-        ConfigurationSection itemSection = configurationSection.getConfigurationSection("item");
-        if (itemSection == null) {
-            EnchantedBosses.getInstance().getLogger().severe("You have forgotten to specify an item for a SpawnEgg! " + configurationSection.getCurrentPath() + ".item");
-            itemStack = new ItemStack(Material.STONE);
-        }
-        else {
-            itemStack = new ItemStackData(itemSection).getItem();
-        }
-    }
+    @JsonProperty
+    @JsonAlias("bosses")
+    private List<String> skillEntities;
+    @JsonProperty
+    private ItemStack item;
 
     public boolean spawn(Chunk centreChunk) {
-        if (skillEntities.size() == 0) {
+        if (skillEntities.isEmpty()) {
             return false;
         }
         Random random = new Random();
         int iterations = 0;
         SpawnHandler spawnHandler = EnchantedBosses.getInstance().getSpawnHandler();
         Chunk[] chunkSquare = spawnHandler.getChunkSquare(centreChunk, 4);
-        int rng = random.nextInt(skillEntities.size());
-        SkillEntity bossToSpawn = skillEntities.get(rng);
-        while (spawnHandler.spawnBoss(bossToSpawn, chunkSquare).isEmpty() && iterations < skillEntities.size() * 2) {
-            rng = random.nextInt(skillEntities.size());
-            bossToSpawn = skillEntities.get(rng);
-            iterations++;
-        }
+
+        SkillEntity bossToSpawn;
+        do {
+            int rng = random.nextInt(skillEntities.size());
+            String bossName = skillEntities.get(rng);
+            bossToSpawn = EnchantedBosses.getInstance().getBossHandler().getBoss(bossName);
+            if (bossToSpawn == null) {
+                EnchantedBosses.getInstance().getLogger().warning("Boss " + bossName + " is not a valid boss!");
+            }
+        } while (spawnHandler.spawnBoss(bossToSpawn, chunkSquare).isEmpty() && iterations < skillEntities.size() * 2);
         return iterations < skillEntities.size() * 2;
     }
 
-    public List<SkillEntity> getSkillEntities() {
-        return skillEntities;
-    }
-
     public ItemStack getItemStack() {
-        return itemStack;
-    }
-
-    public String getName() {
-        return name;
+        return item;
     }
 }

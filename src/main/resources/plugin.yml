@@ -5,6 +5,11 @@ api-version: 1.16
 authors: [ Xemor_ ]
 depend: [ SkillsLibrary2 ]
 description: A configurable bosses plugin
+folia-supported: true
+libraries:
+  - "com.fasterxml.jackson.core:jackson-core:2.18.0"
+  - "com.fasterxml.jackson.core:jackson-databind:2.18.2"
+  - "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.7.0"
 commands:
   boss:
     description: The root command of this plugin

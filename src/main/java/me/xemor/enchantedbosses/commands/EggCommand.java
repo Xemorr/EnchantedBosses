@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EggCommand implements SubCommand {
@@ -17,7 +18,7 @@ public class EggCommand implements SubCommand {
     public void onCommand(CommandSender sender, String[] args) {
         Player receiver;
         SpawnEgg spawnEgg;
-        EggHandler eggHandler = EnchantedBosses.getInstance().getEggHandler();
+        EggHandler eggHandler = EnchantedBosses.getInstance().getConfigHandler().getEggHandler();
         if (args.length > 2) {
             receiver = Bukkit.getPlayer(args[1]);
             if (receiver == null) {
@@ -42,6 +43,6 @@ public class EggCommand implements SubCommand {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
-        return EnchantedBosses.getInstance().getEggHandler().getEggs().stream().map(SpawnEgg::getName).filter((it) -> it.startsWith(args[1])).collect(Collectors.toList());
+        return EnchantedBosses.getInstance().getConfigHandler().getEggHandler().getEggs().stream().map(Map.Entry::getKey).filter((it) -> it.startsWith(args[1])).collect(Collectors.toList());
     }
 }

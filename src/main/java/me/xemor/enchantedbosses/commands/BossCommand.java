@@ -50,7 +50,7 @@ public class BossCommand implements CommandExecutor, TabExecutor {
             }
             else {
                 Audience audience = EnchantedBosses.getBukkitAudiences().sender(sender);
-                audience.sendMessage(MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getNoPermissionMessage()));
+                audience.sendMessage(MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getLanguageConfig().getNoPermission()));
             }
         }
         return true;

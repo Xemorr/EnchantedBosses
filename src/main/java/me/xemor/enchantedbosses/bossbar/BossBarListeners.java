@@ -21,7 +21,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,7 +46,7 @@ public class BossBarListeners implements Listener {
             if (bossBar == null) {
                 return;
             }
-            bossBar.progress((float) (lEntity.getHealth() / lEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()));
+            bossBar.progress((float) (lEntity.getHealth() / lEntity.getAttribute(Attribute.MAX_HEALTH).getValue()));
         }
     }
 
@@ -69,7 +68,7 @@ public class BossBarListeners implements Listener {
         String killerName =  killer == null ? "something" : killer.getName();
         if (!EnchantedBosses.getInstance().getBossHandler().isMinion(e.getEntity())) {
             EnchantedBosses.getBukkitAudiences().all().sendMessage(
-                    MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getBossDeathMessage(),
+                    MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getLanguageConfig().getBossDeathBroadcast(),
                             Placeholder.unparsed("boss", e.getSkillEntity().getName()),
                             Placeholder.unparsed("player", killerName),
                             Placeholder.unparsed("boss_name", e.getSkillEntity().getName()),
@@ -93,42 +92,44 @@ public class BossBarListeners implements Listener {
     }
 
     public void startRunnable(Entity entity, BossBar bossBar) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!entity.isValid()) {
-                    cancel();
-                    return;
-                }
-                List<Entity> nearbyEntities = entity.getNearbyEntities(16, 16, 16);
-                UUID bossUUID = entity.getUniqueId();
-                BossHandler bossHandler = EnchantedBosses.getInstance().getBossHandler();
-                for (Entity nearbyEntity : nearbyEntities) {
-                    if (nearbyEntity instanceof Player player) {
-                        if (bossHandler.bossBarPlayersContains(bossUUID, player.getUniqueId())) continue;
-                        bossHandler.addBossBarPlayer(bossUUID, player.getUniqueId());
-                        EnchantedBosses.getBukkitAudiences().player(player).showBossBar(bossBar);
+        EnchantedBosses.getFoliaHacks().getScheduling().entitySpecificScheduler(entity).runAtFixedRate(
+                (task) -> {
+                    if (!entity.isValid()) {
+                        task.cancel();
+                        return;
                     }
-                }
-                Collection<UUID> bossBarPlayers = bossHandler.getBossBarPlayers(entity.getUniqueId());
-                List<UUID> bossBarPlayersToRemove = new ArrayList<>();
-                for (UUID uuid : bossBarPlayers) {
-                    Player player = Bukkit.getPlayer(uuid);
-                    if (player != null) {
-                        if (!bossHandler.bossBarPlayersContains(entity.getUniqueId(), uuid)) {
-                            continue;
-                        }
-                        if (!player.getWorld().equals(entity.getWorld()) || player.getLocation().distanceSquared(entity.getLocation()) > 10000) {
-                            bossBarPlayersToRemove.add(uuid);
-                            EnchantedBosses.getBukkitAudiences().player(player).hideBossBar(bossBar);
+                    List<Entity> nearbyEntities = entity.getNearbyEntities(16, 16, 16);
+                    UUID bossUUID = entity.getUniqueId();
+                    BossHandler bossHandler = EnchantedBosses.getInstance().getBossHandler();
+                    for (Entity nearbyEntity : nearbyEntities) {
+                        if (nearbyEntity instanceof Player player) {
+                            if (bossHandler.bossBarPlayersContains(bossUUID, player.getUniqueId())) continue;
+                            bossHandler.addBossBarPlayer(bossUUID, player.getUniqueId());
+                            EnchantedBosses.getBukkitAudiences().player(player).showBossBar(bossBar);
                         }
                     }
-                }
-                for (UUID uuid : bossBarPlayersToRemove) {
-                    EnchantedBosses.getInstance().getBossHandler().removeBossBarPlayer(bossUUID, uuid);
-                }
-            }
-        }.runTaskTimer(EnchantedBosses.getInstance().getBossHandler().getEnchantedBosses(), 0L, 20L);
+                    Collection<UUID> bossBarPlayers = bossHandler.getBossBarPlayers(entity.getUniqueId());
+                    List<UUID> bossBarPlayersToRemove = new ArrayList<>();
+                    for (UUID uuid : bossBarPlayers) {
+                        Player player = Bukkit.getPlayer(uuid);
+                        if (player != null) {
+                            if (!bossHandler.bossBarPlayersContains(entity.getUniqueId(), uuid)) {
+                                continue;
+                            }
+                            if (!player.getWorld().equals(entity.getWorld()) || player.getLocation().distanceSquared(entity.getLocation()) > 10000) {
+                                bossBarPlayersToRemove.add(uuid);
+                                EnchantedBosses.getBukkitAudiences().player(player).hideBossBar(bossBar);
+                            }
+                        }
+                    }
+                    for (UUID uuid : bossBarPlayersToRemove) {
+                        EnchantedBosses.getInstance().getBossHandler().removeBossBarPlayer(bossUUID, uuid);
+                    }
+                },
+                () -> {},
+                1L,
+                20L
+        );
     }
 
     @EventHandler
@@ -159,7 +160,7 @@ public class BossBarListeners implements Listener {
         List<Entity> entities = e.getEntities();
         for (Entity entity : entities) {
             SkillEntity boss = bossHandler.getBoss(entity);
-            if (boss != null && boss.getBossBarData().isEnabled()) {
+            if (boss != null && boss.getBossBar().isEnabled()) {
                 SkillsLibrary.getSkillsManager().addLoopEntity(entity.getUniqueId());
                 bossHandler.createBossBar(entity.getUniqueId(), boss);
                 BossBar bossBar = bossHandler.getBossBar(entity.getUniqueId());

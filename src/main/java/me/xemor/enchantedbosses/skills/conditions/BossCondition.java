@@ -1,52 +1,49 @@
 package me.xemor.enchantedbosses.skills.conditions;
 
 import me.xemor.configurationdata.ItemMetaData;
+import me.xemor.configurationdata.JsonPropertyWithDefault;
 import me.xemor.enchantedbosses.EnchantedBosses;
 import me.xemor.enchantedbosses.SkillEntity;
 import me.xemor.skillslibrary2.Mode;
 import me.xemor.skillslibrary2.conditions.Condition;
 import me.xemor.skillslibrary2.conditions.EntityCondition;
 import me.xemor.skillslibrary2.conditions.TargetCondition;
+import me.xemor.skillslibrary2.execution.Execution;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class BossCondition extends Condition implements EntityCondition, TargetCondition {
 
-    private final List<String> bossNames;
+    @JsonPropertyWithDefault
+    private List<String> bossNames = new ArrayList<>(1);
 
-    public BossCondition(int condition, ConfigurationSection configurationSection) {
-        super(condition, configurationSection);
-        this.bossNames = configurationSection.getStringList("entities").stream().map(String::toUpperCase).collect(Collectors.toList());
-    }
-
-    public BossCondition(int condition, List<String> bossNames) {
-        super(condition, Mode.SELF);
-        this.bossNames = bossNames.stream().map(String::toUpperCase).collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean isTrue(Entity skillEntity, Entity target) {
-        return isTrueFor(target);
-    }
-
-    @Override
-    public boolean isTrue(Entity livingEntity) {
-        return isTrueFor(livingEntity);
-    }
+    public BossCondition() {}
+    public BossCondition(String boss) {bossNames.add(boss);}
 
     public boolean isTrueFor(Entity entity) {
         SkillEntity boss = EnchantedBosses.getInstance().getBossHandler().getBoss(entity);
         if (boss != null) {
-            if (bossNames.size() == 0) {
+            if (bossNames.isEmpty()) {
                 return true;
             }
-            return bossNames.contains(boss.getName().toUpperCase());
+            return bossNames.contains(boss.getName());
         }
         return false;
     }
 
 
+    @Override
+    public boolean isTrue(Execution execution, Entity entity) {
+        return isTrueFor(entity);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> isTrue(Execution execution, Entity entity, Entity target) {
+        return CompletableFuture.completedFuture(isTrueFor(target));
+    }
 }

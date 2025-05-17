@@ -2,16 +2,16 @@ package me.xemor.enchantedbosses;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import me.xemor.configurationdata.entity.EntityData;
 import me.xemor.enchantedbosses.bossbar.BossBarData;
+import me.xemor.enchantedbosses.configs.ConfigHandler;
 import me.xemor.enchantedbosses.events.SkillEntitySpawnEvent;
 import me.xemor.skillslibrary2.SkillsLibrary;
 import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
-import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.persistence.PersistentDataType;
@@ -19,12 +19,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BossHandler {
 
-    private HashMap<String, SkillEntity> nameToBosses = new HashMap<>();
-    private final HashMap<UUID, BossBar> entityToBossBar = new HashMap<>();
-    private final Multimap<UUID, UUID> entityToBossBarPlayers = HashMultimap.create();
+    private Map<String, SkillEntity> nameToBosses = new ConcurrentHashMap<>();
+    private final Map<UUID, BossBar> entityToBossBar = new ConcurrentHashMap<>();
+    private final Multimap<UUID, UUID> entityToBossBarPlayers = Multimaps.synchronizedMultimap(HashMultimap.create());
     private final ConfigHandler configHandler;
     private final EnchantedBosses enchantedBosses;
     private final NamespacedKey entityType;
@@ -38,7 +39,7 @@ public class BossHandler {
         minionKey = new NamespacedKey(EnchantedBosses.getInstance(), "minion");
     }
 
-    public void registerBosses(HashMap<String, SkillEntity> bossMap) {
+    public void registerBosses(Map<String, SkillEntity> bossMap) {
         nameToBosses = bossMap;
     }
 
@@ -75,7 +76,7 @@ public class BossHandler {
     }
 
     public void createBossBar(UUID uuid, SkillEntity skillEntity) {
-        BossBarData bossBarData = skillEntity.getBossBarData();
+        BossBarData bossBarData = skillEntity.getBossBar();
         if (bossBarData != null && bossBarData.isEnabled()) {
            BossBar bossBar = BossBar.bossBar(skillEntity.getColouredName(), 1.0f, bossBarData.getColor(), bossBarData.getStyle(), bossBarData.getFlags());
            entityToBossBar.put(uuid, bossBar);

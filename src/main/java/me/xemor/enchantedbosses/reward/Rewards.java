@@ -1,29 +1,23 @@
 package me.xemor.enchantedbosses.reward;
 
-import java.util.HashMap;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 public class Rewards {
 
-    private static final HashMap<String, Integer> nameToReward = new HashMap<>();
-    private static final HashMap<Integer, Class<? extends Reward>> rewardToData = new HashMap<>();
-    private static int counter = 0;
+    private static final BiMap<String, Class<? extends Reward>> rewardToData = HashBiMap.create();
 
     static {
         registerReward("BASIC", BasicReward.class);
         registerReward("TIERED", TieredReward.class);
     }
 
-    public static void registerReward(String name, Class<? extends Reward> effectDataClass) {
-        nameToReward.put(name, counter);
-        rewardToData.put(counter, effectDataClass);
-        counter++;
+    public static void registerReward(String name, Class<? extends Reward> rewardClass) {
+        rewardToData.put(name, rewardClass);
     }
 
-    public static Class<? extends Reward> getClass(int trigger) { return rewardToData.getOrDefault(trigger, BasicReward.class); }
-
-    public static int getReward(String name) {
-        return nameToReward.getOrDefault(name, -1);
+    public static NamedType[] getNamedTypes() {
+        return rewardToData.entrySet().stream().map((entry) -> new NamedType(entry.getValue(), entry.getKey())).toArray(NamedType[]::new);
     }
-
-
 }

@@ -1,47 +1,47 @@
-IronZombie:
-  colouredName: "Iron Zombie"
-  description: "A stronger variant of the zombie"
-  entity:
-    type: ZOMBIE
-    equipment:
-      mainhand:
-        type: IRON_SWORD
-      offhand:
-        type: IRON_SWORD
-      helmet:
-        type: IRON_HELMET
-      chestplate:
-        type: IRON_CHESTPLATE
-      leggings:
-        type: IRON_LEGGINGS
-      boots:
-        type: IRON_BOOTS
-    attributes:
-      MAX_HEALTH: 20
-      SCALE: 1.25
-  skills:
-    antiboat:
-      trigger:
-        type: VEHICLE
-      effects:
-        antiboat:
-          type: CANCEL
-          mode: SELF
-  rewards:
-    type: BASIC
-    items:
-      diamonds:
-        type: IRON_INGOT
-        amount: 2
-    experience: 50
-    commands: []
-  autospawn:
-    mode: REPLACE
-    weighting: 100
-    biomes:
-      - PLAINS
-    worlds:
-      - world
-    biomesWhitelist: true
-    replace:
-      - "ZOMBIE"
+name: IronZombie
+colouredname: "Iron Zombie"
+description: "A stronger variant of the zombie"
+entity:
+  type: ZOMBIE
+  equipment:
+    mainhand:
+      type: IRON_SWORD
+    offhand:
+      type: IRON_SWORD
+    helmet:
+      type: IRON_HELMET
+    chestplate:
+      type: IRON_CHESTPLATE
+    leggings:
+      type: IRON_LEGGINGS
+    boots:
+      type: IRON_BOOTS
+  attributes:
+    MAX_HEALTH: 20
+    SCALE: 1.25
+skills:
+  antiboat:
+    trigger:
+      type: VEHICLE
+    effects:
+      antiboat:
+        type: CANCEL
+        mode: SELF
+rewards:
+  type: BASIC
+  items:
+    diamonds:
+      type: IRON_INGOT
+      amount: 2
+  experience: 50
+  commands: []
+autospawn:
+  mode: REPLACE
+  weighting: 100
+  biomes:
+    - PLAINS
+  worlds:
+    - world
+  biomesWhitelist: true
+  replace:
+    - "ZOMBIE"

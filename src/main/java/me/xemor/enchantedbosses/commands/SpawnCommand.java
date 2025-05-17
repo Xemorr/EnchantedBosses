@@ -1,24 +1,18 @@
 package me.xemor.enchantedbosses.commands;
 
-import me.xemor.enchantedbosses.ConfigHandler;
 import me.xemor.enchantedbosses.EnchantedBosses;
 import me.xemor.enchantedbosses.SkillEntity;
 import me.xemor.enchantedbosses.BossHandler;
-import me.xemor.enchantedbosses.events.SkillEntitySpawnEvent;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SpawnCommand implements SubCommand {
@@ -32,10 +26,14 @@ public class SpawnCommand implements SubCommand {
     @Override
     public void onCommand(CommandSender sender, String[] args) {
         Audience audience = EnchantedBosses.getBukkitAudiences().sender(sender);
+        if (args.length < 2) {
+            audience.sendMessage(MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getLanguageConfig().getNotEnoughArguments()));
+            return;
+        }
         String bossName = args[1];
         SkillEntity skillEntity = bossHandler.getBoss(bossName);
         if (skillEntity == null) {
-            audience.sendMessage(MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getInvalidBossMessage()));
+            audience.sendMessage(MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getLanguageConfig().getInvalidBoss()));
             return;
         }
         if (args.length == 2 && sender instanceof Player player) {
@@ -44,7 +42,7 @@ public class SpawnCommand implements SubCommand {
         else if (args.length == 3) {
             Player player = Bukkit.getPlayer(args[2]);
             if (player == null) {
-                audience.sendMessage(MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getInvalidPlayerMessage()));
+                audience.sendMessage(MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getLanguageConfig().getInvalidPlayer()));
                 return;
             }
             bossHandler.spawn(skillEntity, player.getLocation());
@@ -62,12 +60,12 @@ public class SpawnCommand implements SubCommand {
                     world = player.getWorld();
                 }
                 if (world == null) {
-                    audience.sendMessage(MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getInvalidLocationMessage()));
+                    audience.sendMessage(MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getLanguageConfig().getInvalidLocation()));
                     return;
                 }
                 bossHandler.spawn(skillEntity, new Location(world, x, y, z));
             } catch (NumberFormatException e) {
-                audience.sendMessage(MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getInvalidLocationMessage()));
+                audience.sendMessage(MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getLanguageConfig().getInvalidLocation()));
             }
         }
     }

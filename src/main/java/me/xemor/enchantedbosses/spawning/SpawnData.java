@@ -1,43 +1,36 @@
 package me.xemor.enchantedbosses.spawning;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import me.xemor.configurationdata.JsonPropertyWithDefault;
 import me.xemor.configurationdata.comparison.SetData;
 import org.bukkit.block.Biome;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class SpawnData {
-    private final Mode mode;
-    private double weighting;
-    private int spaceNeeded;
-    private boolean spawnOnAir;
-    private boolean biomesWhitelist;
-    private SetData<Biome> biomes;
-    private List<String> worlds;
-    private int maxHeight;
-    private SetData<EntityType> replace;
 
-    public SpawnData(ConfigurationSection configurationSection) {
-        boolean enabled = configurationSection.getBoolean("enabled", Boolean.FALSE);
-        if (enabled) {
-            mode = Mode.BOSS;
-        }
-        else {
-            mode = Mode.valueOf(configurationSection.getString("mode", "DISABLED"));
-        }
-        if (mode != Mode.DISABLED) {
-            weighting = configurationSection.getDouble("weighting", 1);
-            biomes = new SetData<>(Biome.class, "biomes", configurationSection);
-            worlds = configurationSection.getStringList("worlds");
-            biomesWhitelist = configurationSection.getBoolean("biomesWhitelist", true);
-            spaceNeeded = configurationSection.getInt("spaceNeeded", 0);
-            spawnOnAir = configurationSection.getBoolean("spawnOnAir", true);
-            maxHeight = configurationSection.getInt("maxHeight", -1);
-            replace = new SetData<>(EntityType.class, "replace", configurationSection);
-        }
-    }
+    @JsonPropertyWithDefault
+    private Mode mode = Mode.DISABLED;
+    @JsonPropertyWithDefault
+    private double weighting = 1;
+    @JsonPropertyWithDefault
+    private int spaceNeeded = 0;
+    @JsonPropertyWithDefault
+    private boolean spawnOnAir = true;
+    @JsonPropertyWithDefault
+    private boolean biomesWhitelist = true;
+    @JsonPropertyWithDefault
+    private SetData<Biome> biomes = new SetData<>();
+    @JsonPropertyWithDefault
+    private List<String> worlds = Collections.emptyList();
+    @JsonPropertyWithDefault
+    private int maxHeight = -1;
+    @JsonPropertyWithDefault
+    private SetData<EntityType> replace = new SetData<>();
 
     public Mode getMode() {
         return mode;

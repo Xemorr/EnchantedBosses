@@ -1,6 +1,7 @@
 package me.xemor.enchantedbosses.spawning;
 
-import com.google.common.collect.HashMultimap;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import me.xemor.enchantedbosses.EnchantedBosses;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -13,14 +14,23 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 public class EggHandler implements Listener {
 
-    HashMap<ItemStack, SpawnEgg> itemToEgg = new HashMap<>();
-    HashMap<String, SpawnEgg> nameToEgg = new HashMap<>();
+    @JsonIgnore
+    private Map<ItemStack, SpawnEgg> itemToEgg = new HashMap<>();
+    @JsonIgnore
+    private Map<String, SpawnEgg> nameToEgg = new HashMap<>();
 
     public EggHandler() {
         EnchantedBosses.getInstance().getServer().getPluginManager().registerEvents(this, EnchantedBosses.getInstance());
+    }
+
+    @JsonAnySetter
+    public void addEgg(String key, SpawnEgg value) {
+        itemToEgg.put(value.getItemStack(), value);
+        nameToEgg.put(key, value);
     }
 
     @EventHandler
@@ -50,15 +60,10 @@ public class EggHandler implements Listener {
             }
             else {
                 EnchantedBosses.getBukkitAudiences().player(player).sendMessage(
-                        MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getBossSpawnFailMessage(), Placeholder.parsed("player", player.getDisplayName()))
+                        MiniMessage.miniMessage().deserialize(EnchantedBosses.getInstance().getConfigHandler().getLanguageConfig().getBossSpawnFail(), Placeholder.parsed("player", player.getDisplayName()))
                 );
             }
         }
-    }
-
-    public void registerEgg(SpawnEgg spawnEgg) {
-        itemToEgg.put(spawnEgg.getItemStack(), spawnEgg);
-        nameToEgg.put(spawnEgg.getName(), spawnEgg);
     }
 
     public void clearRegisteredEggs() {
@@ -66,8 +71,8 @@ public class EggHandler implements Listener {
         nameToEgg.clear();
     }
 
-    public Collection<SpawnEgg> getEggs() {
-        return itemToEgg.values();
+    public Collection<Map.Entry<String, SpawnEgg>> getEggs() {
+        return nameToEgg.entrySet();
     }
 
     public SpawnEgg getEgg(String name) {

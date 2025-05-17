@@ -14,9 +14,9 @@ public class DamageChanger implements Listener {
     public void onDamage(EntityDamageEvent e) {
         BossHandler bossHandler = EnchantedBosses.getInstance().getBossHandler();
         SkillEntity skillEntity = bossHandler.getBoss(e.getEntity());
-        if (skillEntity == null) {
-            return;
-        }
+
+        if (skillEntity == null) return;
+
         long numberOfPlayers = e.getEntity().getNearbyEntities(16, 16, 16).stream().filter((entity -> entity instanceof Player)).count();
         e.setDamage(skillEntity.getDamageModifier().modify(e.getDamage(), numberOfPlayers));
     }

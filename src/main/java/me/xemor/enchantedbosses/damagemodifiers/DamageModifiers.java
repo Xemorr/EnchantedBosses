@@ -1,5 +1,8 @@
 package me.xemor.enchantedbosses.damagemodifiers;
 
+import com.fasterxml.jackson.databind.jsontype.NamedType;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import me.xemor.enchantedbosses.reward.BasicReward;
 import me.xemor.enchantedbosses.reward.Reward;
 
@@ -7,9 +10,7 @@ import java.util.HashMap;
 
 public class DamageModifiers {
 
-    private static final HashMap<String, Integer> nameToModifier = new HashMap<>();
-    private static final HashMap<Integer, Class<? extends DamageModifier>> modifierToData = new HashMap<>();
-    private static int counter = 0;
+    private static final BiMap<String, Class<? extends DamageModifier>> modifierToData = HashBiMap.create();
 
     static {
         registerDamageModifier("BLANK", BlankDamageModifier.class);
@@ -19,16 +20,10 @@ public class DamageModifiers {
     }
 
     public static void registerDamageModifier(String name, Class<? extends DamageModifier> effectDataClass) {
-        nameToModifier.put(name, counter);
-        modifierToData.put(counter, effectDataClass);
-        counter++;
+        modifierToData.put(name, effectDataClass);
     }
 
-    public static Class<? extends DamageModifier> getClass(int trigger) { return modifierToData.getOrDefault(trigger, BlankDamageModifier.class); }
-
-    public static int getDamageModifier(String name) {
-        return nameToModifier.getOrDefault(name, -1);
+    public static NamedType[] getNamedTypes() {
+        return modifierToData.entrySet().stream().map((entry) -> new NamedType(entry.getValue(), entry.getKey())).toArray(NamedType[]::new);
     }
-
-
 }

@@ -3,7 +3,6 @@ package me.xemor.enchantedbosses.spawning;
 import me.xemor.enchantedbosses.BossHandler;
 import me.xemor.enchantedbosses.EnchantedBosses;
 import me.xemor.enchantedbosses.SkillEntity;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -11,18 +10,18 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -33,7 +32,7 @@ public class SpawnHandler implements Listener {
     private final List<LocalDateTime> localTimes = new ArrayList<>();
     private Optional<LocalDateTime> optionalNextTime;
     private final ReentrantLock timeLock = new ReentrantLock();
-    private BukkitTask currentTask;
+    private ScheduledTask currentTask;
     private int weightingSum;
     private List<SkillEntity> bosses;
 
@@ -72,41 +71,40 @@ public class SpawnHandler implements Listener {
     }
 
     public void waitForNextTime() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                timeLock.lock();
-                try {
-                    if (optionalNextTime.isEmpty()) {
-                        return;
-                    }
-                } finally {
-                    timeLock.unlock();
-                }
-                LocalDateTime nextTime = optionalNextTime.get();
-                if (currentTask != null) {
-                    currentTask.cancel();
-                }
-                currentTask = new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        timeLock.lock();
-                        try {
-                            if (LocalDateTime.now().isAfter(nextTime)) {
-                                localTimes.remove(nextTime);
-                                localTimes.add(LocalDateTime.of(nextTime.plusDays(1).toLocalDate(), nextTime.toLocalTime()));
-                                optionalNextTime = calculateNextTime();
-                                cancel();
-                                waitForNextTime();
-                                Bukkit.getScheduler().runTask(EnchantedBosses.getInstance(), SpawnHandler.this::spawnRandomBoss);
-                            }
-                        } finally {
-                            timeLock.unlock();
+        EnchantedBosses.getScheduling().asyncScheduler().run(
+                () -> {
+                    timeLock.lock();
+                    try {
+                        if (optionalNextTime.isEmpty()) {
+                            return;
                         }
+                    } finally {
+                        timeLock.unlock();
                     }
-                }.runTaskTimer(EnchantedBosses.getInstance(), 100L, 100L);
-            }
-        }.runTaskAsynchronously(EnchantedBosses.getInstance());
+                    LocalDateTime nextTime = optionalNextTime.get();
+                    if (currentTask != null) {
+                        currentTask.cancel();
+                    }
+                    currentTask = EnchantedBosses.getScheduling().asyncScheduler().runAtFixedRate(
+                            () -> {
+                                timeLock.lock();
+                                try {
+                                    if (LocalDateTime.now().isAfter(nextTime)) {
+                                        localTimes.remove(nextTime);
+                                        localTimes.add(LocalDateTime.of(nextTime.plusDays(1).toLocalDate(), nextTime.toLocalTime()));
+                                        optionalNextTime = calculateNextTime();
+                                        currentTask.cancel();
+                                        waitForNextTime();
+                                        EnchantedBosses.getScheduling().globalRegionalScheduler().run(SpawnHandler.this::spawnRandomBoss);
+                                    }
+                                } finally {
+                                    timeLock.unlock();
+                                }
+                            },
+                            Duration.of(5, ChronoUnit.SECONDS),
+                            Duration.of(5, ChronoUnit.SECONDS));
+                }
+        );
     }
 
     public void disable() {
@@ -205,7 +203,7 @@ public class SpawnHandler implements Listener {
             }
             Location location = toSpawnOn.getLocation();
             if (broadcast) {
-                Component component = MiniMessage.miniMessage().deserialize(bossHandler.getConfigHandler().getBossSpawnMessage(),
+                Component component = MiniMessage.miniMessage().deserialize(bossHandler.getConfigHandler().getLanguageConfig().getBossSpawned(),
                         Placeholder.component("name", boss.getColouredName()),
                         Placeholder.unparsed("x",String.valueOf(location.getBlockX())),
                         Placeholder.unparsed("y",String.valueOf(location.getBlockY())),

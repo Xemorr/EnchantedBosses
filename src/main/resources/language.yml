@@ -1,0 +1,10 @@
+no_permission: "<dark_red>You do not have permission to do this!"
+invalid_boss: "<dark_red>You have entered an invalid boss name!"
+invalid_player: "<dark_red>You have entered an invalid player name!"
+invalid_location: "<dark_red>You have entered an invalid location"
+not_enough_arguments: "<dark_red>You have not entered enough arguments!"
+boss_spawned: A <name> has spawned at <x>, <y>, <z> in world <world>!
+boss_time: "A boss will spawn in <hour> hours, <minutes> minutes and <seconds> seconds!"
+no_boss_time: Bosses are not currently spawning on a timer!
+boss_spawn_fail: "*CRACK* The boss egg failed for some reason!"
+boss_death_broadcast: "A <boss> has been killed by <player>"

@@ -2,15 +2,9 @@ package me.xemor.enchantedbosses.damagemodifiers;
 
 import org.bukkit.configuration.ConfigurationSection;
 
-public class BlankDamageModifier extends DamageModifier {
+public class BlankDamageModifier implements DamageModifier {
 
-    public BlankDamageModifier(ConfigurationSection section) {
-        super(section);
-    }
-
-    public BlankDamageModifier() {
-        super(null);
-    }
+    public BlankDamageModifier() {}
 
     @Override
     public double modify(double x, long numberOfPlayers) {
