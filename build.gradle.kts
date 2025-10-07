@@ -3,11 +3,14 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     java
     `maven-publish`
-    id("com.github.johnrengelman.shadow") version("7.1.2")
+    id("com.gradleup.shadow") version("8.3.6")
+    id("io.sentry.jvm.gradle") version("3.12.0")
 }
 
 group = "me.xemor"
-version = "2.0.0"
+version = "2.0.1"
+description = "Enchanted Bosses"
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 repositories {
     mavenCentral()
@@ -38,7 +41,6 @@ dependencies {
 
 java {
     configurations.shadow.get().dependencies.remove(dependencies.gradleApi())
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
 var free = tasks.register<ShadowJar>("free") {

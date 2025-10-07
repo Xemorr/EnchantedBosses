@@ -106,30 +106,37 @@ public class ConfigHandler {
 
     public void loadBosses() {
         ObjectMapper objectMapper = setupObjectMapper();
-        Map<String, SkillEntity> nameToSkillEntity = Arrays.stream(new File(EnchantedBosses.getInstance().getDataFolder(), "entities").listFiles())
-                .parallel()
-                .map((file) -> {
-                    try {
-                        return objectMapper.readValue(file, SkillEntity.class);
-                    } catch (IOException e) {
-                        EnchantedBosses.getInstance().getLogger().severe(e.getMessage());
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .filter((it) -> it.getName() != null)
-                .collect(Collectors.toMap(SkillEntity::getName, (skillEntity) -> skillEntity));
-        if (nameToSkillEntity.size() > 30 && !isPremium) {
-            EnchantedBosses.getInstance().getLogger().severe("You have reached the maximum bosses allowance for the free tier of Enchanted Bosses!");
-            EnchantedBosses.getInstance().getLogger().severe("Please buy the full version to have more than 30 bosses!");
-            Bukkit.getServer().getOnlinePlayers().forEach((p) -> {
-                p.sendMessage("You have reached the maximum bosses allowance for the free tier of Enchanted Bosses!");
-                p.sendMessage("Please buy the full version to have more than 30 bosses!");
-            });
-            return;
+        try {
+            Map<String, SkillEntity> nameToSkillEntity = Files.walk(Paths.get(EnchantedBosses.getInstance().getDataFolder().getPath(), "entities"))
+                    .filter(Files::isRegularFile)
+                    .parallel()
+                    .map((it) -> new File(it.toUri()))
+                    .filter((file) -> file.getName().endsWith(".yml") || file.getName().endsWith(".yaml"))
+                    .map((file) -> {
+                        try {
+                            return objectMapper.readValue(file, SkillEntity.class);
+                        } catch (IOException e) {
+                            EnchantedBosses.getInstance().getLogger().severe("While parsing file: %s\n%s".formatted(file.getName(), e));
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .filter((it) -> it.getName() != null)
+                    .collect(Collectors.toMap(SkillEntity::getName, (skillEntity) -> skillEntity));
+            if (nameToSkillEntity.size() > 30 && !isPremium) {
+                EnchantedBosses.getInstance().getLogger().severe("You have reached the maximum bosses allowance for the free tier of Enchanted Bosses!");
+                EnchantedBosses.getInstance().getLogger().severe("Please buy the full version to have more than 30 bosses!");
+                Bukkit.getServer().getOnlinePlayers().forEach((p) -> {
+                    p.sendMessage("You have reached the maximum bosses allowance for the free tier of Enchanted Bosses!");
+                    p.sendMessage("Please buy the full version to have more than 30 bosses!");
+                });
+                return;
+            }
+            nameToSkillEntity.values().forEach(this::registerSkills);
+            enchantedBosses.getBossHandler().registerBosses(nameToSkillEntity);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        nameToSkillEntity.values().forEach(this::registerSkills);
-        enchantedBosses.getBossHandler().registerBosses(nameToSkillEntity);
     }
 
     public ObjectMapper setupObjectMapper() {
